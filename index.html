@@ -74,7 +74,7 @@
             <div class="container">
                 <div class="row">
                     <div class="col-md-8 col-md-offset-2">
-                        <h1 class="brand-heading">Walking the Pacific Crest Trail</h1>
+                        <h1 class="brand-heading">Walking the PCT</h1>
                         <p class="intro-text">One day at a time.</p>
                         <a href="#about" class="btn btn-circle page-scroll">
                             <i class="fa fa-angle-double-down animated"></i>
@@ -92,7 +92,6 @@
                 <h2>Today</h2>
                 <p id="today"></p>
                 <p>I walked #### steps today.</p>
-                <p>I've walked ####### steps this year.</p>
                 <p>That puts me about here on the PCT:</p>
             </div>
         </div>
@@ -108,10 +107,10 @@
                 </div>
             </div>
         </div>
-        <form action="" id="message-form" class="col-lg-8 col-lg-offset-2">
+        <form action="" id="step-form" class="col-lg-8 col-lg-offset-2">
           <div class="form-group">
             <label class="col-lg-8 col-lg-offset-2">Manually add some steps:</label>
-              <textarea id="message" type="text" class="form-control"></textarea>
+              <textarea id="someSteps" type="text" class="form-control"></textarea>
           </div>
           <button class="btn">Submit</button>
         </form>
@@ -149,6 +148,8 @@
             <p>Copyright &copy; T.Ditty 2017</p>
         </div>
     </footer>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/3.7.5/firebase.js"></script>
 
     <!-- jQuery -->
     <script src="vendor/jquery/jquery.js"></script>
