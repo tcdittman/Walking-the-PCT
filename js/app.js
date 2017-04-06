@@ -68,8 +68,7 @@ $(document).ready(function() {
 
   var urlStart = 'https://wbsapi.withings.net/v2/measure?action=getactivity&startdateymd=2017-01-01';
 
-  //var endDate = '&enddateymd=2017-04-03';
-  var tokenAppend = '&access_token=045699620b8a93a98f2ce62c0d0970f4f99c4dc6';
+  var tokenAppend = '&access_token=f855c3a7396218f1888dd2d556ece7520d2e210e';
 
   var totalSteps = 0;
   var sumSteps = function(results) {
