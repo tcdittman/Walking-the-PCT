@@ -42,71 +42,139 @@ var config = {
 };
 firebase.initializeApp(config);
 
-var stepLogReference = firebase.database();
+var stepLogDatabase = firebase.database();
 
 
+var totalSteps = 0; //the variable that stores the total count
 
 $(document).ready(function() {
-  //manually submitting steps
+
+
+  console.log("the beginning. total steps are zero: "  + totalSteps);
+  //manually submitted steps get sent to the database
   $('#step-form').submit(function (event) {
       event.preventDefault()
       var numSteps = $('#someSteps').val()
+      totalSteps += parseInt(numSteps);
+      console.log("what are total steps? ... "  + totalSteps);
       $('#someSteps').val('')
 
       // create a section for daily step data in the db
-      var dailyStepsReference = stepLogReference.ref('dailysteps');
+      var dailyStepsReference = stepLogDatabase.ref('dailysteps');
       dailyStepsReference.push({
           steps: numSteps,
           date: thisDay
       });
-      console.log("dailyStepsReference = " + dailyStepsReference);
-      $('#step-form').addClass('hidden');
+      generateProgress();
   });
-
-
+  getSteps();
 
 
   var urlStart = 'https://wbsapi.withings.net/v2/measure?action=getactivity&startdateymd=2017-01-01';
 
-  var tokenAppend = '&access_token=8a62236f74b0b1c5d2e504fe7f2622bd90726276';
+  var tokenAppend = '&access_token=6971af5a43f8d360d7a317ce3a928d97a86e00d7';
 
-  var totalSteps = 0;
+  //add up the steps for all the days in the API call and store in totalSteps
   var sumSteps = function(results) {
-
     results.body.activities.forEach(function(day) {
       if (day.steps === 0) {}
       else {
         totalSteps += (day.steps);
         console.log("this day's steps: " + day.steps);
         console.log("miles travelled this day: " + Math.round(day.steps/1973.8318));
+        var dailyStepsReference = stepLogDatabase.ref('dailysteps');
+        dailyStepsReference.push({
+            steps: day.steps,
+            date: day.date
+        });
       }
     });
     console.log("total annual steps = " + totalSteps);
-
-    var annualMiles = Math.round(totalSteps/1973.8318);
-    console.log("total annual miles = " + annualMiles);
-
-    var percentOfPct = (annualMiles/2650*100);
-    console.log("this percentage of the PCT: " + percentOfPct);
-
-    var roundedPercentOfPct = (Math.round(percentOfPct * 100) / 100);
-    console.log("rounded percentage of the PCT: " + roundedPercentOfPct);
-
-    var roundedPercentOfMap = (Math.round(percentOfPct * 100 * .9) / 100) + "%";
-    console.log("rounded percentage for the map: " + roundedPercentOfMap);
-
-    $('.pctprogressmapmarker').css('width', roundedPercentOfMap);
-
-
-    console.log("or this percentage of the JMT: " + (Math.round(annualMiles/210*100)));
-
-    var $yearSteps = $('<p>I\'ve walked ' + totalSteps + ' steps this year.</p>');
-    var $yearMiles = $('<p>That\'s about ' + annualMiles + ' miles "hiked" this year.</p>');
-    var $yearMiles = $('<p>Which is ' + roundedPercentOfPct + '% of the PCT.</p>');
-    $("#today").append($yearSteps, $yearMiles);
+    generateProgress();
 
   };
   $.get(urlStart + endDate + tokenAppend, sumSteps);
-
-
 });
+
+//Using totalSteps, generate the values to display in the DOM
+function generateProgress(){
+  var annualMiles = Math.round(totalSteps/1973.8318);
+  console.log("total annual miles = " + annualMiles);
+
+  var percentOfPct = (annualMiles/2650*100);
+  console.log("this percentage of the PCT: " + percentOfPct);
+
+  var roundedPercentOfPct = (Math.round(percentOfPct * 100) / 100);
+  console.log("rounded percentage of the PCT: " + roundedPercentOfPct);
+
+  var roundedPercentOfMap = (Math.round(percentOfPct * 100 * .9) / 100) + "%";
+  console.log("rounded percentage for the map: " + roundedPercentOfMap);
+
+  //display the progress in the DOM
+  $('.pctprogressmapmarker').css('width', roundedPercentOfMap);
+
+  $("#today").empty();
+  var $yearSteps = $('<p>I\'ve walked ' + totalSteps + ' steps this year.</p>');
+  var $yearMiles = $('<p>That\'s about ' + annualMiles + ' miles "hiked" this year.</p>');
+  var $percentPCT = $('<p>Which is ' + roundedPercentOfPct + '% of the PCT.</p>');
+  $("#today").append($yearSteps, $yearMiles, $percentPCT);
+};
+
+
+
+function getSteps() {
+    // retrieve messages data when .on() initially executes
+    // and when its data updates
+    // https://firebase.google.com/docs/reference/js/firebase.database.Reference
+    stepLogDatabase.ref('dailysteps').on('value', function (results) {
+      var $stepList = $('.stepList');
+      var datesWithSteps = [];
+
+      var allDays = results.val();
+      // iterate through results coming from database call; messages
+      for (var day in allDays) {
+        var stepz = allDays[day].steps;
+        var dayte = allDays[day].date;
+
+        // create message element
+        var $dateListElement = $('<li>');
+
+        // create delete element
+        var $deleteElement = $('<i class="fa fa-trash pull-right delete"></i>');
+        $deleteElement.on('click', function (e) {
+          var id = $(e.target.parentNode).data('id')
+          deleteDay(id);
+          generateProgress();
+        });
+
+
+        // add id as data attribute so we can refer to later for updating
+        $dateListElement.attr('data-id', day);
+
+        // add message to li
+        $dateListElement.html(stepz);
+
+        // add delete element
+        $dateListElement.append($deleteElement);
+
+
+        // show votes
+        $dateListElement.append('<div>Date: ' + dayte + '</div><br>');
+
+        // push element to array of messages -- this is pushing to an array, not HTTP push
+        datesWithSteps.push($dateListElement);
+      }
+
+      // remove lis to avoid dupes
+      // .empty() is a jQuery method to remove all child nodes
+      $stepList.empty();
+      for (var i in datesWithSteps) {
+        $stepList.append(datesWithSteps[i]);
+      }
+    });
+  }
+
+function deleteDay(id) {
+  var dayReference =  stepLogDatabase.ref('dailysteps').child(id);
+  dayReference.remove();
+};
