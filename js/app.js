@@ -27,9 +27,9 @@ var todaysDate = (function() {
   endDate = '&enddateymd='+ yyyy + '-' + mm + '-' + dd;
 })();
 
-  console.log("today is " + thisDay);
-  var $theDate = $('<p>Today\'s date is ' + thisDay + '</p>');
-  $("#today").append($theDate);
+console.log("today is " + thisDay);
+var $theDate = $('<p>Today\'s date is ' + thisDay + '</p>');
+//$("#today").append($theDate);
 
 // Initialize Firebase
 var config = {
@@ -72,7 +72,7 @@ $(document).ready(function() {
 
   var urlStart = 'https://wbsapi.withings.net/v2/measure?action=getactivity&startdateymd=2017-01-01';
 
-  var tokenAppend = '&access_token=6971af5a43f8d360d7a317ce3a928d97a86e00d7';
+  var tokenAppend = '&access_token=09d242476caa28b272bf68018545d928c903f7d3';
 
   //add up the steps for all the days in the API call and store in totalSteps
   var sumSteps = function(results) {
@@ -83,10 +83,12 @@ $(document).ready(function() {
         console.log("this day's steps: " + day.steps);
         console.log("miles travelled this day: " + Math.round(day.steps/1973.8318));
         var dailyStepsReference = stepLogDatabase.ref('dailysteps');
-        dailyStepsReference.push({
-            steps: day.steps,
-            date: day.date
-        });
+        // need an if/else to only push new entries
+        //dailyStepsReference.id.date??
+        //dailyStepsReference.push({
+        //    steps: day.steps,
+        //    date: day.date
+      //  });
       }
     });
     console.log("total annual steps = " + totalSteps);
@@ -117,26 +119,23 @@ function generateProgress(){
   var $yearSteps = $('<p>I\'ve walked ' + totalSteps + ' steps this year.</p>');
   var $yearMiles = $('<p>That\'s about ' + annualMiles + ' miles "hiked" this year.</p>');
   var $percentPCT = $('<p>Which is ' + roundedPercentOfPct + '% of the PCT.</p>');
-  $("#today").append($yearSteps, $yearMiles, $percentPCT);
+  $("#today").append($theDate, $yearSteps, $yearMiles, $percentPCT);
 };
 
 
 
 function getSteps() {
-    // retrieve messages data when .on() initially executes
-    // and when its data updates
-    // https://firebase.google.com/docs/reference/js/firebase.database.Reference
     stepLogDatabase.ref('dailysteps').on('value', function (results) {
       var $stepList = $('.stepList');
       var datesWithSteps = [];
 
       var allDays = results.val();
-      // iterate through results coming from database call; messages
+      // iterate through results coming from database call;
       for (var day in allDays) {
         var stepz = allDays[day].steps;
         var dayte = allDays[day].date;
-
-        // create message element
+        //totalSteps += stepz;
+        //create a list element for each manual date
         var $dateListElement = $('<li>');
 
         // create delete element
@@ -177,4 +176,5 @@ function getSteps() {
 function deleteDay(id) {
   var dayReference =  stepLogDatabase.ref('dailysteps').child(id);
   dayReference.remove();
+  generateProgress();
 };
