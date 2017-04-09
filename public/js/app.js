@@ -43,7 +43,7 @@ $(document).ready(function() {
   $('#step-form').submit(function (event) {
       event.preventDefault()
       var numSteps = $('#someSteps').val()
-      totalSteps += parseInt(numSteps); //add manual steps to the current total TESTING
+      //totalSteps += parseInt(numSteps); //add manual steps to the current total TESTING
       $('#someSteps').val('')
 
       //add manual steps to a section in the db
@@ -52,14 +52,14 @@ $(document).ready(function() {
           steps: numSteps,
           date: thisDay
       });
-      generateProgress(); //update the progress map with manual steps
+      //setTimeout(generateProgress(), 1000); //update the progress map with manual steps
   });
   getSteps(); //display database steps in the DOM
 
 
   //API call to pull step data from Withings
   var urlStart = 'https://wbsapi.withings.net/v2/measure?action=getactivity&startdateymd=2017-01-01';
-  var tokenAppend = '&access_token=ea8a408a3311e83a8b25725387decaf58d1530f4';
+  var tokenAppend = '&access_token=29689693dc945ece98987cb8a9c3941596cdc17a';
 
   //function to sum all the steps from the API call, stored in totalSteps
   function sumSteps (results) {
@@ -96,11 +96,11 @@ function generateProgress(){
 
   var roundedPercentOfPct = (Math.round(percentOfPct * 100) / 100);
 
+  //because the map is 90% of the width of the page
   var roundedPercentOfMap = (Math.round(percentOfPct * 100 * .9) / 100) + "%";
 
   //display the progress in the DOM
   $('.pctprogressmapmarker').css('width', roundedPercentOfMap);
-
   $("#today").empty();
   var $yearSteps = $('<p>I\'ve walked ' + totalSteps + ' steps this year.</p>');
   var $yearMiles = $('<p>That\'s about ' + annualMiles + ' miles "hiked" this year.</p>');
@@ -163,6 +163,11 @@ function getSteps() {
       for (var i in datesWithSteps) {
         $stepList.append(datesWithSteps[i]);
       }
+      setTimeout(function(){
+      console.log("totalSteps A = " + totalSteps);
+      generateProgress();
+      console.log("totalSteps B = " + totalSteps);
+    }, 1000);
   });
 };
 
