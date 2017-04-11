@@ -59,7 +59,7 @@ $(document).ready(function() {
 
   //API call to pull step data from Withings
   var urlStart = 'https://wbsapi.withings.net/v2/measure?action=getactivity&startdateymd=2017-01-01';
-  var tokenAppend = '&access_token=29689693dc945ece98987cb8a9c3941596cdc17a';
+  var tokenAppend = '&access_token=b0441131527c82ade9a0279192e757f31329cc42';
 
   //function to sum all the steps from the API call, stored in totalSteps
   function sumSteps (results) {
@@ -78,13 +78,11 @@ $(document).ready(function() {
         */
       }
     });
-    console.log("totalSteps at point 0 = " + totalSteps);
 
     generateProgress(); // display step data in the DOM
 
   };
   $.get(urlStart + endDate + tokenAppend, sumSteps); // make the API call!
-console.log("totalSteps at point -1 = " + totalSteps);
 });
 
 //Using totalSteps, generate the values to display in the DOM
@@ -134,10 +132,8 @@ function getSteps() {
         // create delete element
         var $deleteElement = $('<i class="fa fa-trash pull-right delete"></i>');
         $deleteElement.on('click', function (e) {
-          console.log("totalSteps at point 1 = " + totalSteps);
           var id = $(e.target.parentNode).data('id')
           deleteDay(id);
-          console.log("totalSteps at point 2 = " + totalSteps);
 
         //  generateProgress();
         });
@@ -164,16 +160,13 @@ function getSteps() {
         $stepList.append(datesWithSteps[i]);
       }
       setTimeout(function(){
-      console.log("totalSteps A = " + totalSteps);
       generateProgress();
-      console.log("totalSteps B = " + totalSteps);
     }, 1000);
   });
 };
 
 //function to run when the delete element is clicked
 function deleteDay(id) {
-  console.log("totalSteps at point 3 = " + totalSteps);
 
   //subtract from running total in DOM
   function removeTheseSteps(data){
@@ -181,15 +174,12 @@ function deleteDay(id) {
     totalSteps -= data2;
   };
   $.get('https://hiking-the-pct.firebaseio.com/dailysteps/' + id + '/steps.json', removeTheseSteps);
-  console.log("totalSteps at point 4 = " + totalSteps);
 
   //remove from database
   var dayReference =  stepLogDatabase.ref('dailysteps').child(id);
   setTimeout(function(){
     dayReference.remove();
-    console.log("totalSteps at point 5 = " + totalSteps);
 
     generateProgress();
   }, 500);
-  console.log("totalSteps at point 6 = " + totalSteps);
 };
